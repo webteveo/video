@@ -36,7 +36,7 @@ float sdCappedTorus(vec3 p, vec2 sc, float ra, float rb){
 float blob(vec3 p){
   float n = 0.0;
   if (uMorph > 0.001) n = (snoise(p * 1.05 + vec3(0.0, uT * 0.55, uT * 0.2)) * 0.78 + snoise(p * 2.0 - vec3(uT * 0.7, 0.0, uT * 0.3)) * 0.16) * uMorph;
-  float d = length(p) - uRadius * (1.0 + 0.07 * uPulse) - 0.26 * n;
+  float d = length(p) - uRadius * (1.0 + 0.07 * uPulse + 0.26 * n);
   if (uCharge > 0.001) d -= snoise(p * 6.0 + vec3(uT * 40.0)) * 0.035 * uCharge;
   for (int i = 0; i < 3; i++) if (uSat[i].w > 0.0) d = smin(d, length(p - uSat[i].xyz) - uSat[i].w, 0.55);
   return d;
@@ -140,7 +140,7 @@ export class Blob {
   params(t) {
     const T = t - 4.0;
     const reveal = K.lerp(1.4, -1.6, K.outCubic(K.clamp((T - 0.02) / 0.42)));
-    const morph = K.smoothstep(0.15, 0.9, T) * (1 - 0.85 * K.smoothstep(1.4, 1.85, T));
+    const morph = K.smoothstep(0.15, 0.9, T) * (1 - 0.95 * K.smoothstep(1.35, 1.8, T));
     const charge = K.inQuad(K.clamp((T - 1.5) / 0.5));
     const radius = 1.0 - 0.28 * K.anticipate(K.clamp((T - 1.45) / 0.55));
     const pulse = K.hit(T, 0.0, 0.1) * 0 + K.hit(T, 0.5, 0.12) + K.hit(T, 1.0, 0.12) + 0.7 * K.hit(T, 1.5, 0.1);
@@ -150,11 +150,12 @@ export class Blob {
       const out = K.smoothstep(0.45 + i * 0.08, 1.0 + i * 0.08, T) * (1 - K.inOutCubic(K.clamp((T - 1.3 - i * 0.04) / 0.3)));
       const ang = T * (1.3 + 0.35 * i) + i * 2.1;
       const tilt = 0.6 + i * 0.7;
-      const rr = 0.85 + 0.72 * out;
+      const absorb = K.smoothstep(1.42, 1.72, T);                 // swallowed by the charging core
+      const rr = (0.85 + 0.72 * out) * (1 - 0.9 * absorb);
       let x = Math.cos(ang) * rr, y = 0, z = Math.sin(ang) * rr;
       const cy = Math.cos(tilt), sy = Math.sin(tilt);
       [y, z] = [y * cy - z * sy, y * sy + z * cy];
-      const rad = (0.2 + 0.07 * (2 - i)) * K.smoothstep(0.35, 0.6, T + i * 0.03);
+      const rad = (0.2 + 0.07 * (2 - i)) * K.smoothstep(0.35, 0.6, T + i * 0.03) * (1 - absorb);
       sats.push(x, y, z, T > 0.35 ? rad : 0);
     }
     const ringSweep = K.snap(K.clamp((T - 0.22) / 0.55)) * (1 - K.inOutCubic(K.clamp((T - 1.35) / 0.35)));

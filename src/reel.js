@@ -101,14 +101,14 @@ export class Reel {
     const part = K.smoothstep(6.0, 6.1, t) * (1 - K.smoothstep(7.75, 8.0, t));
     const drop = K.smoothstep(10.0, 10.05, t) * (1 - K.smoothstep(11.9, 12.0, t));
     return {
-      bloom: K.lerp(0.22, 0.04, flat) + 0.13 * part + 0.18 * drop,
+      // Impact punches flare the highlights (bloom) instead of lifting the blacks.
+      bloom: K.lerp(0.22, 0.04, flat) + 0.13 * part + 0.18 * drop
+        + 1.1 * K.hit(t, 10.0, 0.07) + 0.7 * K.hit(t, 6.0, 0.08) + 0.35 * K.hit(t, 1.0, 0.06),
       bloomThreshold: K.lerp(0.9, 1.1, flat),
       ca: K.lerp(0.0016, 0.0004, flat) + 0.009 * tr * tr,
       vignette: K.lerp(0.32, 0.1, flat), grain: 0.035,
       barrel: 0.04 * tr * tr,
-      flash: 0.1 * K.hit(t, 10.0, 0.025),
-      exposure: (1 + 1.4 * K.hit(t, 10.0, 0.06) + 0.7 * K.hit(t, 6.0, 0.07) + 0.35 * K.hit(t, 1.0, 0.05)) * (1 - K.smoothstep(14.8, 14.99, t)),
-      flashColor: [1, 0.97, 0.92],
+      exposure: (1 + 0.25 * K.hit(t, 10.0, 0.04)) * (1 - K.smoothstep(14.8, 14.99, t)),
     };
   }
 

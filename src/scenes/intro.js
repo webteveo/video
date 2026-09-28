@@ -203,7 +203,7 @@ export class Intro {
     const tau = t - 1.0;
     if (tau < 0 || tau > 1.2) return;
     // Shockwaves
-    for (const [delay, col, w0, reach, dur] of [[0, C.PAPER, 9, 1350, 0.85], [0.1, C.SIGNAL, 3, 1000, 0.9]]) {
+    for (const [delay, col, w0, reach, dur] of [[0, C.PAPER, 9, 1350, 0.85], [0.1, C.SIGNAL, 3, 900, 0.6]]) {
       const u = K.clamp((tau - delay) / dur);
       if (u <= 0 || u >= 1) continue;
       ctx.strokeStyle = rgba(col, Math.pow(1 - u, 1.4));
