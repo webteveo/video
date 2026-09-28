@@ -108,23 +108,24 @@ export class Graphics {
     ctx.letterSpacing = '11px';
     ctx.fillStyle = rgba(P.CREAM, 0.78 * inA * (1 - outA));
     ctx.fillText('HACEMOS', X0, 384 - (1 - inA) * 20);
-    // Slot window
-    const yb = 548, hBand = 190;
-    ctx.beginPath(); ctx.rect(X0 - 20, yb - 196, 1100, 210); ctx.clip();
+    // Slot window: its top edge sits just under the HACEMOS baseline (384) and above the Ó accent
+    // (~399), so outgoing words slide under the label instead of across it.
+    const yb = 548, hBand = 190, top = 392;
+    ctx.beginPath(); ctx.rect(X0 - 20, top, 1100, yb + 14 - top); ctx.clip();
     ctx.font = '900 152px "Big Shoulders"';
     ctx.letterSpacing = '2px';
     const f = (t - T0) / STEP;
     const k = Math.max(0, Math.min(words.length - 1, Math.floor(f)));
     const frac = f - Math.floor(f);
-    const roll = k < words.length - 1 ? K.snap(K.clamp((frac - 0.62) / 0.38)) : 0;
+    // No roll before the first word has landed (f < 0 would otherwise pre-roll word 1).
+    const roll = f >= 0 && k < words.length - 1 ? K.snap(K.clamp((frac - 0.62) / 0.38)) : 0;
     const drawWord = (i, dy) => {
       if (i < 0 || i >= words.length) return;
       ctx.fillStyle = i === words.length - 1 ? rgba(P.WARM, 1 - outA) : rgba(P.CREAM, 1 - outA);
       ctx.fillText(words[i], X0 - 4, yb + dy);
     };
     const enter = K.glide(K.clamp((t - T0) / 0.22));
-    if (t < T0 + STEP) drawWord(0, (1 - enter) * hBand);
-    else drawWord(k, -roll * hBand);
+    drawWord(k, (k === 0 ? (1 - enter) * hBand : 0) - roll * hBand);
     if (roll > 0) drawWord(k + 1, (1 - roll) * hBand);
     ctx.restore();
     // Underline that tracks the current word's width
