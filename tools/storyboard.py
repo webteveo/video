@@ -7,8 +7,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 FF = os.environ.get('FFMPEG', 'ffmpeg')
 src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, 'out/showreel.mp4')
 dst = sys.argv[2] if len(sys.argv) > 2 else os.path.join(ROOT, 'dist/storyboard.jpg')
-SHOTS = [(1.07, '01  PRINCIPLES'), (3.38, '02  KINETIC TYPE'), (4.95, '03  3D / LOOKDEV'), (6.85, '04  PARTICLES'),
-         (8.85, '05  SHAPE LAYERS'), (11.1, '06  PROCEDURAL 3D'), (12.36, '07  EDIT / RHYTHM'), (14.4, '08  IDENTITY')]
+reel = sys.argv[3] if len(sys.argv) > 3 else 'showreel'
+SHOTS = {
+    'showreel': [(1.07, '01  PRINCIPLES'), (3.38, '02  KINETIC TYPE'), (4.95, '03  3D / LOOKDEV'), (6.85, '04  PARTICLES'),
+                 (8.85, '05  SHAPE LAYERS'), (11.1, '06  PROCEDURAL 3D'), (12.36, '07  EDIT / RHYTHM'), (14.4, '08  IDENTITY')],
+    'cacontainers': [(0.75, 'EL CONTENEDOR'), (2.08, 'A TU CASA'), (3.4, 'HACEMOS…'), (4.2, 'A MEDIDA'),
+                     (5.85, 'DESDE 30 DÍAS'), (7.3, '19 DEPARTAMENTOS'), (8.3, 'MARCA'), (9.5, 'LLAMADO A LA ACCIÓN')],
+}[reel]
 TW, TH, COLS, PAD, LAB = 640, 360, 4, 10, 34
 rows = (len(SHOTS) + COLS - 1) // COLS
 sheet = Image.new('RGB', (COLS * TW + (COLS + 1) * PAD, rows * (TH + LAB) + (rows + 1) * PAD), (11, 11, 14))

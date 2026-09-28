@@ -398,18 +398,19 @@ function noiseTexture(r, N = 256) {
 }
 
 // ---------------------------------------------------------------- camera: Hermite spline, time-scaled tangents
+// [time, position, look-at target, framing offset (m) — shifts the subject right of centre while type is on screen]
 export const CAM_KEYS = [
-  [0.0, [8.4, 1.05, 10.0], [0.7, 1.95, 0.3]],
-  [0.6, [7.7, 1.1, 9.4], [0.55, 1.75, 0.35]],
-  [1.2, [5.9, 1.3, 9.3], [0.25, 1.55, 0.5]],
-  [1.95, [3.7, 1.5, 9.5], [-0.05, 1.45, 0.7]],
-  [2.3, [3.2, 1.8, 10.6], [-0.05, 1.8, 0.8]],
-  [2.62, [4.8, 2.9, 13.4], [0.0, 2.85, 1.0]],
-  [3.3, [8.6, 3.3, 11.9], [0.0, 2.9, 1.0]],
-  [3.95, [5.2, 3.7, 14.1], [0.0, 3.0, 1.15]],
-  [4.45, [0.4, 4.1, 13.6], [0.0, 3.4, 1.5]],
-  [4.78, [-0.3, 4.42, 9.2], [0.0, 4.45, 4.08]],
-  [5.04, [-0.02, 4.47, 4.55], [0.0, 4.47, 3.9]],
+  [0.0, [8.4, 1.05, 10.0], [0.7, 1.95, 0.3], 1.3],
+  [0.6, [7.7, 1.1, 9.4], [0.55, 1.75, 0.35], 1.5],
+  [1.2, [6.3, 1.35, 10.1], [0.25, 1.55, 0.5], 1.6],
+  [1.95, [4.1, 1.55, 10.4], [-0.05, 1.45, 0.7], 1.75],
+  [2.3, [3.6, 1.85, 11.4], [-0.05, 1.8, 0.8], 1.8],
+  [2.62, [5.3, 3.0, 14.8], [0.0, 2.85, 1.0], 3.1],
+  [3.3, [9.5, 3.4, 13.1], [0.0, 2.9, 1.0], 3.2],
+  [3.95, [5.8, 3.8, 15.5], [0.0, 3.0, 1.15], 3.3],
+  [4.45, [0.5, 4.2, 15.0], [0.0, 3.4, 1.5], 2.6],
+  [4.78, [-0.3, 4.42, 9.2], [0.0, 4.45, 4.08], 0.3],
+  [5.04, [-0.02, 4.47, 4.55], [0.0, 4.47, 3.9], 0.0],
 ];
 function hermite(k, t, idx) {
   let i = 0;
@@ -417,15 +418,21 @@ function hermite(k, t, idx) {
   const t0 = k[i][0], t1 = k[i + 1][0], dt = t1 - t0, u = K.clamp((t - t0) / dt);
   const tan = (j) => {
     const a = k[Math.max(0, j - 1)], b = k[Math.min(k.length - 1, j + 1)];
+    if (typeof a[idx] === 'number') return [(b[idx] - a[idx]) / (b[0] - a[0])];
     return a[idx].map((v, c) => (b[idx][c] - v) / (b[0] - a[0]));
   };
-  const m0 = tan(i), m1 = tan(i + 1), p0 = k[i][idx], p1 = k[i + 1][idx];
+  const m0 = tan(i), m1 = tan(i + 1);
+  const p0 = [].concat(k[i][idx]), p1 = [].concat(k[i + 1][idx]);
   const u2 = u * u, u3 = u2 * u;
   const h00 = 2 * u3 - 3 * u2 + 1, h10 = u3 - 2 * u2 + u, h01 = -2 * u3 + 3 * u2, h11 = u3 - u2;
   return p0.map((_, c) => h00 * p0[c] + h10 * dt * m0[c] + h01 * p1[c] + h11 * dt * m1[c]);
 }
 export function houseCamera(t) {
-  const pos = hermite(CAM_KEYS, t, 1), tgt = hermite(CAM_KEYS, t, 2);
+  return cameraFrom(hermite(CAM_KEYS, t, 1), hermite(CAM_KEYS, t, 2), hermite(CAM_KEYS, t, 3)[0]);
+}
+export function cameraFrom(pos, tgt0, off = 0) {
+  const r0 = norm(cross([0, 1, 0], norm(sub(pos, tgt0))));
+  const tgt = tgt0.map((v, i) => v - r0[i] * off);
   const back = norm(sub(pos, tgt));
   const right = norm(cross([0, 1, 0], back));
   const up = cross(back, right);

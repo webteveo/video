@@ -30,7 +30,7 @@ d = ImageDraw.Draw(canvas)
 env = np.array([np.max(np.abs(x[int(a):int(b)])) for a, b in zip(np.linspace(0, len(x), W + 1)[:-1], np.linspace(0, len(x), W + 1)[1:])])
 for i, e in enumerate(env):
     d.line([(i, H + 80 - e * 70), (i, H + 80 + e * 70)], fill=(255, 120, 60))
-cues = json.load(open('src/data/cues.json'))
+cues = json.load(open(sys.argv[3] if len(sys.argv) > 3 else 'src/data/cues.json'))
 dur = len(x) / sr
 for tt, name in [(v, k) for k, v in cues['t'].items()]:
     X = tt / dur * W

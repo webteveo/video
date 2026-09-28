@@ -2,6 +2,7 @@
 """Replace frame ranges of a rendered master with re-rendered segments (no full re-render needed).
 
   python3 tools/splice.py out/master.mkv out/master2.mkv 58:121=out/fixA.mkv 320:386=out/fixB.mkv ...
+  TOTAL=600 python3 tools/splice.py out/cacontainers_master.mkv ...     (frame count; default 900)
 
 Each patch `a:b=file` must contain exactly frames [a, b) as rendered by `render.mjs video --from a --to b`.
 """
@@ -9,7 +10,7 @@ import os, subprocess, sys
 
 FF = os.environ.get('FFMPEG', 'ffmpeg')
 src, dst, *specs = sys.argv[1:]
-TOTAL = 900
+TOTAL = int(os.environ.get('TOTAL', '900'))
 patches = []
 for s in specs:
     rng, f = s.split('=')

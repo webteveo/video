@@ -25,6 +25,36 @@ plays as one continuous shot.
 | 12.0–12.9 | **07 Edit / rhythm** | The whole reel scrubs backwards at 14× under an NLE timeline, while the soundtrack rewinds with it. | Re-timing, VHS glitch, 30 fps scrub cadence, tape-stop |
 | 12.9–15.0 | **08 Identity** | The dot writes the name, hops down, and lands as the period of the tagline. | End-slate typography, bookended sound design |
 
+## CA Containers UY — spot de 10 segundos (en español)
+
+**▶ [`dist/cacontainers.mp4`](dist/cacontainers.mp4)** · 1920×1080 · 60 fps · 10,0 s · H.264 + AAC
+
+![Storyboard CA Containers](dist/cacontainers_storyboard.jpg)
+
+Un spot para [cacontainersuy.com](https://cacontainersuy.com/) con la misma filosofía: todo generado por
+código, imagen y sonido.
+
+| Tiempo | Qué pasa |
+|---|---|
+| 0,0–1,5 | Un contenedor marítimo 20' HC cae y aterriza con polvo y un golpe metálico. Tiene el stencil **CA CONTAINERS** en el costado. Letra por letra cae **DE CONTENEDOR**. |
+| 1,0–2,3 | La pared larga se abate y se convierte en deck. Se prende la luz cálida, junto con la frase *a tu casa.* Sofá, alfombra, planta, cocina, lámpara y cuadro aparecen uno por beat. |
+| 2,1–4,5 | Un segundo contenedor cae cruzado encima, en voladizo, con un ventanal que se enciende. Un ticker tipo tragamonedas recorre **HACEMOS** casas / oficinas / tiny houses / depósitos / barbacoas / *a medida*. |
+| 4,5–6,2 | La cámara entra por el ventanal. Un iris abre a una lámina tipo plano: **LLAVE EN MANO — DESDE 30 DÍAS**, con un calendario de 30 días que se completa y la llave en el día 30. |
+| 6,2–7,6 | El mapa de Uruguay (contorno real de Natural Earth) se dibuja solo. Desde el **taller en Canelones** salen rutas a los **19 departamentos**, junto con **+50 proyectos**. |
+| 7,6–10 | Cierre sobre un render hero de la casa: marca, *Casas contenedor llave en mano*, **PEDÍ TU COTIZACIÓN**, `cacontainersuy.com`, +10 años · financiación en cuotas · envíos a todo el país. |
+
+Detalles técnicos:
+* **Ray tracer analítico.** Hay 40 cajas orientadas y 8 esferas en 6 clusters con AABB. El
+  corrugado es bump mapping, y el stencil y las marcas de puerta son texturas de canvas. El cielo
+  es de hora azul, con luz de atardecer de contraluz.
+* **Luces de área cálidas** (tira LED, lámpara, ventanal). Se muestrean estratificadas entre los
+  sub-frames del motion blur, así las sombras suaves convergen sin ruido.
+* **Banda sonora** a 120 BPM en Re mayor (I–vi–IV–V–I). El primer compás arranca con el golpe del
+  contenedor. Hay chirrido de bisagra, golpe del deck, interruptor, pops de muebles, ticks de
+  contador, *ding* de llave, 19 notas de pines y el acorde final. Normalizada a −14 LUFS.
+* Datos del negocio tomados de su sitio: llave en mano desde 30 días, +50 proyectos en 19
+  departamentos, +10 años, taller en Canelones y financiación en cuotas.
+
 ## How it's made
 
 ```
@@ -34,7 +64,8 @@ src/
   scenes/   intro · blob · particles · bauhaus · pillars · rewind · endcard
   reel.js   master timeline: scene dispatch, camera shake, per-section look, HUD
   data/     cues.json — the shared beat/cue sheet that picture and sound both read
-audio/      synth.py (oscillators, filters, drums, FX, reverb, limiter) · score.py (the arrangement)
+  reels/cacontainers/   the CA Containers UY spot: house.js (ray tracer) · graphics.js · reel.js · uruguay.json
+audio/      synth.py (oscillators, filters, drums, FX, reverb, limiter) · score.py · cacontainers.py
 tools/      render.mjs (headless Chromium → ffmpeg) · build.sh · glyphs.py · contact/spectrogram/loudness
 ```
 
@@ -70,7 +101,8 @@ npm i -D playwright && npx playwright install chromium   # skip if Playwright is
 bash tools/build.sh                                         # fonts → glyphs → timings → score → frames → MP4
 ```
 
-A full render takes about an hour on 4 CPU cores with no GPU (WebGL runs on SwiftShader). For
+`REEL=cacontainers bash tools/build.sh` builds the CA Containers spot the same way. A full render
+takes about an hour on 4 CPU cores with no GPU (WebGL runs on SwiftShader). For
 fixes, `tools/splice.py` swaps re-rendered frame ranges into an existing master, so you don't need
 a full pass. Useful while iterating:
 
