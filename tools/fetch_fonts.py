@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Download the reel's typefaces (latin subset, variable woff2) from Google Fonts into assets/fonts.
+"""Download the reels' typefaces (latin subset, variable woff2) from Google Fonts into assets/fonts.
 
-Archivo (wdth 62–125, wght 100–900), Instrument Serif and JetBrains Mono — all SIL Open Font License.
+Archivo (wdth 62–125, wght 100–900), Instrument Serif, JetBrains Mono, Big Shoulders and Big Shoulders
+Stencil (opsz + wght) — all SIL Open Font License.
 """
 import os, re, urllib.request
 
@@ -12,6 +13,8 @@ SPECS = [
     ('Archivo:ital,wdth,wght@0,62..125,100..900', 'Archivo'),
     ('Instrument+Serif:ital@0;1', 'InstrumentSerif'),
     ('JetBrains+Mono:wght@100..800', 'JetBrainsMono'),
+    ('Big+Shoulders:opsz,wght@10..72,100..900', 'BigShoulders'),
+    ('Big+Shoulders+Stencil:opsz,wght@10..72,100..900', 'BigShouldersStencil'),
 ]
 
 

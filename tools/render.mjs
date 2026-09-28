@@ -2,8 +2,9 @@
 // Offline renderer: serves the project, drives headless Chromium (WebGL2 via SwiftShader) and
 // streams raw frames either to PNG stills or to an ffmpeg master encode.
 //
-//   node tools/render.mjs stills --frames 0,30,60-90:5 [--samples 8] [--dir out/stills]
-//   node tools/render.mjs video  [--from 0 --to 900] [--jobs 2] [--samples 8] [--out out/master.mkv]
+//   node tools/render.mjs stills --frames 0,30,60-90:5 [--samples 8] [--dir out/stills] [--reel showreel]
+//   node tools/render.mjs video  [--from 0 --to 900] [--jobs 2] [--samples 8] [--out out/master.mkv] [--reel …]
+//   node tools/render.mjs timings [--reel …]        (derived event times for the score)
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -12,7 +13,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const W = 1920, H = 1080, FPS = 60, TOTAL = 900;
+const W = 1920, H = 1080, FPS = 60;
 
 let chromium;
 try { ({ chromium } = await import('playwright')); }
@@ -26,6 +27,10 @@ const mode = argv[0];
 const opt = (k, d) => { const i = argv.indexOf('--' + k); return i >= 0 ? argv[i + 1] : d; };
 const samples = opt('samples', '');
 const jobs = parseInt(opt('jobs', '1'), 10);
+const REEL = opt('reel', 'showreel');
+const CUES = JSON.parse(fs.readFileSync(path.join(ROOT, REEL === 'showreel' ? 'src/data/cues.json' : `src/reels/${REEL}/cues.json`), 'utf8'));
+const TOTAL = Math.round(CUES.duration * FPS);
+const PREFIX = REEL === 'showreel' ? '' : `${REEL}_`;
 
 function parseFrames(spec) {
   const out = [];
@@ -99,8 +104,9 @@ async function runJob(id, frames, sink) {
   const page = await browser.newPage({ viewport: { width: 640, height: 360 } });
   page.on('console', (m) => { const t = m.text(); if (!/GPU stall|GL Driver Message/.test(t)) console.log(`[job${id}] ${t}`); });
   page.on('pageerror', (e) => console.error(`[job${id}] PAGE ERROR`, e));
-  const q = new URLSearchParams({ job: String(id) });
+  const q = new URLSearchParams({ job: String(id), reel: REEL });
   if (samples) q.set('samples', samples);
+  for (let i = 0; i < argv.length; i++) if (argv[i] === '--param') { const [k, v] = argv[i + 1].split('='); q.set(k, v); }
   await page.goto(`http://127.0.0.1:${PORT}/src/index.html?${q}`);
   await page.waitForFunction(() => window.__ready === true || window.__error, null, { timeout: 120000 });
   const err = await page.evaluate(() => window.__error);
@@ -117,7 +123,7 @@ function eta(start, done, total) {
 try {
   if (mode === 'stills') {
     const frames = parseFrames(opt('frames', '0'));
-    const dir = path.resolve(ROOT, opt('dir', 'out/stills'));
+    const dir = path.resolve(ROOT, opt('dir', `out/${PREFIX}stills`));
     fs.mkdirSync(dir, { recursive: true });
     const t0 = Date.now(); let n = 0;
     await runJob(0, frames, async (f, buf) => {
@@ -127,7 +133,7 @@ try {
     console.log(`\nwrote ${frames.length} stills to ${dir}`);
   } else if (mode === 'video') {
     const from = parseInt(opt('from', '0'), 10), to = parseInt(opt('to', String(TOTAL)), 10);
-    const out = path.resolve(ROOT, opt('out', 'out/master.mkv'));
+    const out = path.resolve(ROOT, opt('out', `out/${PREFIX}master.mkv`));
     fs.mkdirSync(path.dirname(out), { recursive: true });
     const per = Math.ceil((to - from) / jobs);
     const t0 = Date.now(); let n = 0;
@@ -164,10 +170,10 @@ try {
     const browser = await chromium.launch({ args: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
     const page = await browser.newPage();
     page.on('pageerror', (e) => console.error('PAGE ERROR', e));
-    await page.goto(`http://127.0.0.1:${PORT}/src/index.html?job=0`);
+    await page.goto(`http://127.0.0.1:${PORT}/src/index.html?job=0&reel=${REEL}`);
     await page.waitForFunction(() => window.__ready === true || window.__error, null, { timeout: 120000 });
     const tm = await page.evaluate(() => window.timings());
-    const out = path.resolve(ROOT, opt('out', 'audio/timings.json'));
+    const out = path.resolve(ROOT, opt('out', `audio/${PREFIX}timings.json`));
     fs.writeFileSync(out, JSON.stringify(tm, null, 1));
     console.log('wrote', out);
     await browser.close();

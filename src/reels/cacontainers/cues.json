@@ -1,0 +1,12 @@
+{
+  "bpm": 120,
+  "fps": 60,
+  "duration": 10.0,
+  "t": {
+    "drop": 0.0, "land": 0.5, "title": 0.55, "hinge": 1.0, "deck": 1.45, "lights": 1.47, "casa": 1.5,
+    "furnish": 1.65, "stackDrop": 2.1, "stackLand": 2.5, "ticker": 2.62, "push": 4.55, "proof": 5.0,
+    "thirty": 5.8, "map": 6.25, "pins": 6.5, "end": 7.6, "cta": 8.25
+  },
+  "sections": [],
+  "impacts": [[0.5, 0.85], [1.45, 0.22], [2.5, 0.75], [5.0, 0.28], [6.25, 0.15], [7.6, 0.32]]
+}
