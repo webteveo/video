@@ -70,8 +70,9 @@ npm i -D playwright && npx playwright install chromium   # skip if Playwright is
 bash tools/build.sh                                         # fonts → glyphs → timings → score → frames → MP4
 ```
 
-A full render takes about 35 minutes on 4 CPU cores with no GPU (WebGL runs on SwiftShader). Useful
-while iterating:
+A full render takes about an hour on 4 CPU cores with no GPU (WebGL runs on SwiftShader). For
+fixes, `tools/splice.py` swaps re-rendered frame ranges into an existing master, so you don't need
+a full pass. Useful while iterating:
 
 ```bash
 python3 tools/fetch_fonts.py && python3 tools/glyphs.py          # once: fonts + variable glyph data
