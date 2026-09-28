@@ -1,0 +1,13 @@
+{
+  "name": "motion-reel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "A 15-second procedural motion-design showreel rendered offline with WebGL2 + Canvas2D.",
+  "scripts": {
+    "stills": "node tools/render.mjs stills",
+    "render": "node tools/render.mjs video",
+    "audio": "python3 audio/score.py",
+    "build": "bash tools/build.sh"
+  }
+}

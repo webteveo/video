@@ -1,0 +1,6 @@
+node_modules/
+out/
+# Fonts are fetched from Google Fonts (OFL) by tools/fetch_fonts.py; glyph data is derived from them.
+assets/fonts/*.woff2
+src/data/glyphs.json
+__pycache__/
